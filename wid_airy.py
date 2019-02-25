@@ -367,6 +367,7 @@ for item in zip(loc_list, uv_list):
 # print (*xc_xf,sep="\n")
 # print(*loc_list, sep="\n")
 
+'''
 print(time_range[13])
 print(xc_xf[13])
 print(len(loc_list[13]))
@@ -379,33 +380,18 @@ print(len(v_list[13]))
 # Try for only 1 time step
 # Index no 13 is when the crest at the front of topsides
 uv_single =[c*d for c, d in zip(u_list[13], v_list[13])]
-# print(*uv_single, sep="\n")
 print(*uv_single, sep="\n")
 
 single_test = simps(uv_single, loc_list[13])
 print(single_test)
+'''
 
 
 
+plt.figure(1)
+plt.plot(time_range, force_front_list, time_range, force_bottom_list)
+plt.show()
 
-
-
-
-
-# plt.figure(1)
-# plt.plot(loc_list[13], u_list[13], loc_list[13], v_list[13])
-# plt.show()
-
-
-# # print(len(force_bottom_list))
-# print(*force_bottom_list, sep="\n")
-
-# print(len(time_range))
-# print(len(force_bottom_list))
-
-
-# plt.figure(1)
-# plt.plot(time_range, force_front_list, time_range, force_bottom_list)
 
 # # # # # plt.subplot(212)
 # # # # # plt.plot(loc_lis[2], z_local)
