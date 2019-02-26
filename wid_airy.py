@@ -13,6 +13,11 @@ T = 13.1	# Wave period - seconds
 H = 31.8	# Wave height - meters
 D = 90.48	# Still water depth - meters
 
+''' Angle of wave attack
+    Note :
+    1. The direction normal to slice should be (0 <= alpha < 90) '''
+THETA = 30
+
 # Current Data
 U_current = 0.93 # Maximum current 
 
@@ -28,6 +33,8 @@ G = 9.81	# Gravity - m/s2
 RHO = 1025	# Seawater density - kg/m3
 
 ###	--- Function Definition --- ###
+
+# Wave in deck
 
 # Calculate wave length
 def wave_length (depth, period) :
@@ -118,20 +125,72 @@ def sample_range (starting, ending, size) :
 
 	return sample
 
+# Rectangular Slice
 
+# Line function f(x)
+def fx(x, angle, c) :
+	m = round(math.tan(math.radians(angle)), 3)
+	
+	return round(m * x  +  c, 3) 
+
+# Line function f(y)
+def fy(y, angle, c) :
+	m = round(math.tan(math.radians(angle)), 3)
+
+	return round((y - c)/m, 3)
+
+# Calc diagonal length
+def diagonal_length(width, length):
+
+	return round(math.sqrt(width**2 + length**2),3)
+
+''' Calc Lp (length where "c" in the line equation will be taken)
+    alpha and theta are in degree! '''
+def el_p(alpha, theta, diagonal):
+
+	if theta > alpha :
+		diagonal_up = diagonal * math.cos(math.radians(theta - alpha))
+
+	elif theta < alpha :
+		diagonal_up = diagonal * math.cos(math.radians(alpha - theta))
+
+	else :
+		diagonal_up = diagonal
+
+	el_p = diagonal_up / math.cos(math.radians(90 - theta))
+
+	print("This is d' = ", diagonal_up)
+
+
+	return round(el_p, 3)
 
 
 
 ## -- Running Program --- ###
 
+# Calculate wave length
 L = wave_length(D, T)
 print("wave length :", L)
 
-u = wave_hor_vel(D, T, H, L, 0, 0, H/2)
-print("horizontal velocity :", u)
+# Calculate maximum horizontal kinematic velocity at crest
+u_crest = wave_hor_vel(D, T, H, L, 0, 0, H/2)
+print("horizontal velocity at crest :", u_crest)
 
-v = wave_ver_vel(D, T, H, L, 0, 0, H/2)
-print("vertical velocity :", v)
+# Calculate vertical kinematic velocity at crest
+v_crest = wave_ver_vel(D, T, H, L, 0, 0, H/2)
+print("vertical velocity at crest :", v_crest)
+
+# Check wave angle attack, quit run if not satisfied
+if 0 <= THETA < 90 :
+	print("Angle of wave attack (THETA) :" , THETA)
+	zero_angle_status = False
+
+	if THETA == 0 :
+		zero_angle_status = True
+
+else :
+	print(" 0<= THETA < 90 is not satisfied, current input :", THETA)
+	sys.exit()
 
 
 # (depth, period, height, length, time, loc, surface_el)
@@ -187,6 +246,11 @@ if H/2 > Hd :
 else:
 	print ("No wave inundation")
 	sys.exit()
+
+
+'''Look Here!'''
+
+
 
 # Calculate important t
 # t = 0	: Max crest at x = 0 (centre)
