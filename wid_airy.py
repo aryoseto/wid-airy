@@ -162,9 +162,7 @@ def el_p(alpha, theta, diagonal):
 	print("This is d' = ", diagonal_up)
 
 
-	return round(el_p, 3)
-
-
+	return (round(el_p, 3), round(diagonal_up, 3))
 
 ## -- Running Program --- ###
 
@@ -248,30 +246,51 @@ else:
 	sys.exit()
 
 
-'''Look Here!'''
+# Check if it is a non zero angle
+if zero_angle_status == False :
+	
+	# Calculate diagonal length
+	dia_length = diagonal_length(B, Ld)
+	print('This is d =', dia_length)
+	
+	# Calculate ALPHA (angle of the rec diagonal)
+	alpha = math.degrees(math.atan(B/Ld))
+	print('ALPHA =', alpha)
 
+	# Calculate Lp and Diagonal' (d')
+	Lp, d_Up = el_p(alpha, THETA, dia_length)
+	print ("This is Lp = ", Lp)
+	print ("This is d_Up =", d_Up)
+	sys.exit()
+
+	# Use Lp as the topside length 
+	object_length = Lp
+
+else :
+	# Use actual topside length
+	object_length = Ld
 
 
 # Calculate important t
 # t = 0	: Max crest at x = 0 (centre)
 
 # t1 	: When front of wave hits the deck
-t1 = find_t(D, T, H, L, -Ld/2, Hd, 1)
+t1 = find_t(D, T, H, L, -object_length/2, Hd, 1)
 
 # t2	: Wave crest at front of the deck (-Ld/2) 
-t2 = find_t(D, T, H, L, -Ld/2, H/2, 1)
+t2 = find_t(D, T, H, L, -object_length/2, H/2, 1)
 
 # t3	: Back of wave at front of the deck (-Ld/2)
-t3 = find_t(D, T, H, L, -Ld/2, Hd, -1)
+t3 = find_t(D, T, H, L, -object_length/2, Hd, -1)
 
 # t4	: Front of wave reaches back of the deck (Ld/2)
-t4 = find_t(D, T, H, L, Ld/2, Hd, 1)
+t4 = find_t(D, T, H, L, object_length/2, Hd, 1)
 
 # t5	: Crest reaches back of the deck (Ld/2)
-t5 = find_t(D, T, H, L, Ld/2, H/2, 1)
+t5 = find_t(D, T, H, L, object_length/2, H/2, 1)
 
 # t6	: Back of wave exiting at the back of the deck (Ld/2)
-t6 = find_t(D, T, H, L, Ld/2, Hd, -1)
+t6 = find_t(D, T, H, L, object_length/2, Hd, -1)
 
 print(t1, t2, t3, t4, t5, t6)
 
@@ -319,8 +338,8 @@ crest_to_foot = round((delta_t / T) * L, 3)
 
 # Calculate Xc and Xf for every time step
 # Define starting point
-loc_front = -Ld/2					# Location of front wave at time[0]
-loc_crest = -Ld/2 - crest_to_foot	# Location of wave crest at time[0]
+loc_front = -object_length/2					# Location of front wave at time[0]
+loc_crest = -object_length/2 - crest_to_foot	# Location of wave crest at time[0]
 
 # length step 
 length_step = (t6-t1)/100 / T * L
@@ -331,26 +350,26 @@ for index in range(0, len(time_range)) :
 	loc_front_i = loc_front + length_step * index
 	loc_crest_i = loc_crest + length_step * index
 
-	if loc_crest_i < -Ld/2 :
-		Xc = -Ld/2
+	if loc_crest_i < -object_length/2 :
+		Xc = -object_length/2
 
-	elif loc_crest_i >= Ld/2 :
-		Xc = Ld/2
+	elif loc_crest_i >= object_length/2 :
+		Xc = object_length/2
 
 	else :
 		Xc = loc_crest_i
 
 
-	if loc_front_i <= Ld/2 :
+	if loc_front_i <= object_length/2 :
 		Xf = loc_front_i
 
 	else :
-		Xf = Ld/2
+		Xf = object_length/2
 
 	xc_xf.append([round(Xc, 3), round(Xf, 3)])
 
-# print (*xc_xf,sep="\n")
-
+print (*xc_xf,sep="\n")
+sys.exit()
 
 
 #print (sample_range(xc_xf[2][0], xc_xf[2][1], 0.1 ))
@@ -411,6 +430,72 @@ for index in range(0, len(time_range)):
 								wave_surface(D, T, H, L, time_range[index], each_loc)  ))
 
 	v_list.append(v_list_each)
+
+# Calculate width for every integration point
+if zero_angle_status == True:
+
+	# Calculate B
+	# Calc properties for each slice 
+	nodes_list = []
+	x1 = 0
+	x2 = Ld
+	y3 = 0
+	y4 = B
+
+	# for item in loc_lits, calculate the width ! look this 
+	for c in numpy.arange(0, Lp, Lp/100) :
+
+		node_selected = []
+	
+		# Solve f(x), x = 0
+		y1 = fx(x1, THETA + 90, c)
+		if 0 <= y1 <= B :
+			node_selected.append([x1, y1])
+
+		# Solve f(x), x = L
+		y2 = fx(x2, THETA + 90, c)
+		if 0 <= y2 <= B :
+			node_selected.append([x2, y2])
+
+		# Solve f(y), y = 0
+		x3 = fy(y3, THETA + 90, c)
+		if 0 <= x3 <= L :
+			node_selected.append([x3, y3])
+
+		# Solve f(y), y = B
+		x4 = fy(y4, THETA + 90, c)
+		if 0 <= x4 <= L :
+			node_selected.append([x4, y4])
+
+		# Put all the selected nodes into a list
+		nodes_list.append([round(c,3), node_selected])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # # Check length of every item in u_list
