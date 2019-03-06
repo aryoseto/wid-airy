@@ -159,7 +159,7 @@ def el_p(alpha, theta, diagonal):
 
 	el_p = diagonal_up / math.cos(math.radians(90 - theta))
 
-	print("This is d' = ", diagonal_up)
+	#print("This is d' = ", diagonal_up)
 
 
 	return (round(el_p, 3), round(diagonal_up, 3))
@@ -259,12 +259,12 @@ if zero_angle_status == False :
 
 	# Calculate Lp and Diagonal' (d')
 	Lp, d_Up = el_p(alpha, THETA, dia_length)
-	print ("This is Lp = ", Lp)
+	print ("This is Lp = ", Lp)   
 	print ("This is d_Up =", d_Up)
 	sys.exit()
 
 	# Use Lp as the topside length 
-	object_length = Lp
+	object_length = d_Up
 
 else :
 	# Use actual topside length
